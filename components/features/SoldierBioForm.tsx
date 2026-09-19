@@ -260,7 +260,7 @@ export function SoldierBioForm({
   const {
     ref: tabStripRef,
     handlers: tabStripHandlers,
-    wasDrag: tabStripWasDrag,
+    consumeDrag: tabStripConsumeDrag,
   } = useDragToScroll<HTMLDivElement>();
 
   return (
@@ -354,10 +354,10 @@ export function SoldierBioForm({
           <button
             key={tab.key}
             type="button"
-            onClick={() => {
-              if (tabStripWasDrag()) return;
-              setActiveSheet(tab.key);
-            }}
+onClick={() => {
+                if (tabStripConsumeDrag()) return;
+                setActiveSheet(tab.key);
+              }}
             className={cn(
               "shrink-0 rounded-xl border px-4 py-2.5 text-left transition-all",
               activeSheet === tab.key

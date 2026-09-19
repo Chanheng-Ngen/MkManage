@@ -150,7 +150,12 @@ export function PersonnelDirectory({
   );
 
   const pagination = listQuery.data?.pagination;
-  const showBar = Boolean(pagination && !listQuery.isLoading && items.length > 0);
+  const showBar = Boolean(
+    pagination &&
+      !listQuery.isLoading &&
+      items.length > 0 &&
+      pagination.totalPages > 1,
+  );
   const resultWord = lang === "en" ? (pagination?.total === 1 ? "result" : "results") : t("directory.result");
 
   const changeSearch = (value: string) => {

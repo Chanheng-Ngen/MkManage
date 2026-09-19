@@ -156,7 +156,7 @@ export function ProfileViewer({
   const {
     ref: sectionListRef,
     handlers: sectionListHandlers,
-    wasDrag: sectionListWasDrag,
+    consumeDrag: sectionListConsumeDrag,
   } = useDragToScroll<HTMLDivElement>();
 
   const profileQuery = useQuery({
@@ -276,7 +276,7 @@ export function ProfileViewer({
                 key={sec.key}
                 type="button"
                 onClick={() => {
-                  if (sectionListWasDrag()) return;
+                  if (sectionListConsumeDrag()) return;
                   setSection(sec.key);
                 }}
                 className={cn(
