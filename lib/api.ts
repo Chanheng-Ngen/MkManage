@@ -110,6 +110,20 @@ export async function saveSheetRecord(
   return data;
 }
 
+export async function updateSheetRows(
+  sheet: SheetKey,
+  personnelId: string,
+  rows: Row[],
+): Promise<SubmitResponse> {
+  const { data } = await apiClient.post<SubmitResponse>(
+    SHEETS_ENDPOINT,
+    { rows },
+    { params: { sheet, action: "syncsheet", id: personnelId } },
+  );
+
+  return data;
+}
+
 export async function createFullProfile(payload: {
   personnel: Row;
   sheets: Partial<Record<SheetKey, Row[]>>;

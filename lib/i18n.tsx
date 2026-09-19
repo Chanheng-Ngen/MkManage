@@ -237,6 +237,14 @@ const DICT: Record<string, { en: string; km: string }> = {
   },
   "form.prevSheet": { en: "Prev", km: "មុន" },
   "form.nextSheet": { en: "Next", km: "បន្ទាប់" },
+  "form.updateSheet": {
+    en: "Update sheet",
+    km: "ធ្វើបច្ចុប្បន្នភាពសន្លឹក",
+  },
+  "form.updateAll": {
+    en: "Update all",
+    km: "ធ្វើបច្ចុប្បន្នភាពទាំងអស់",
+  },
 
   // Self-registration page
   "register.title": {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, type WheelEvent } from "react";
+import { useMemo, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import {
   ArrowLeft,
@@ -14,10 +14,16 @@ import {
   Trash2,
   TriangleAlert,
 } from "lucide-react";
-import { generateRegisterToken, submitBioToSheets } from "@/lib/api";
+import {
+  generateRegisterToken,
+  saveSheetRecord,
+  submitBioToSheets,
+  updateSheetRows,
+} from "@/lib/api";
 import { DETAIL_SHEET_DEFS, DETAIL_SHEET_KEYS, SHEET_DEF_MAP } from "@/lib/constants";
 import type { DetailSheetKey, FullProfileDraft, Row, SheetKey } from "@/lib/types";
 import { useLanguage } from "@/lib/i18n";
+import { useDragToScroll } from "@/lib/useDragToScroll";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { FieldEditor } from "@/components/ui/FieldEditor";
@@ -87,6 +93,67 @@ export function SoldierBioForm({
       } else {
         setFeedback({ type: "error", message: response.error ?? response.message ?? t("form.saveFailed") });
       }
+    },
+    onError: (error: unknown) => {
+      setFeedback({
+        type: "error",
+        message: error instanceof Error ? error.message : t("common.unknownError"),
+      });
+    },
+  });
+
+  const sheetUpdateMutation = useMutation({
+    mutationFn: async () => {
+      if (!selectedPersonnelId) throw new Error(t("common.unknownError"));
+      if (activeSheet === "personnel") {
+        return saveSheetRecord("personnel", "update", draft.personnel, selectedPersonnelId);
+      }
+      return updateSheetRows(
+        activeSheet,
+        selectedPersonnelId,
+        draft.sheets[activeSheet as DetailSheetKey] ?? [],
+      );
+    },
+    onSuccess: (response) => {
+      if (response.success || response.result === "success") {
+        setFeedback({ type: "success", message: t("form.savedUpdate") });
+        onSaved?.();
+      } else {
+        setFeedback({ type: "error", message: response.error ?? response.message ?? t("form.saveFailed") });
+      }
+    },
+    onError: (error: unknown) => {
+      setFeedback({
+        type: "error",
+        message: error instanceof Error ? error.message : t("common.unknownError"),
+      });
+    },
+  });
+
+  const allUpdateMutation = useMutation({
+    mutationFn: async () => {
+      if (!selectedPersonnelId) throw new Error(t("common.unknownError"));
+
+      const personnelRes = await saveSheetRecord(
+        "personnel",
+        "update",
+        draft.personnel,
+        selectedPersonnelId,
+      );
+
+      if (!(personnelRes.success || personnelRes.result === "success")) {
+        throw new Error(personnelRes.error ?? personnelRes.message ?? t("form.saveFailed"));
+      }
+
+      await Promise.all(
+        DETAIL_SHEET_KEYS.map((sheet) =>
+          updateSheetRows(sheet, selectedPersonnelId, draft.sheets[sheet] ?? []),
+        ),
+      );
+    },
+    onSuccess: () => {
+      setFeedback({ type: "success", message: t("form.savedUpdate") });
+      onSaved?.();
     },
     onError: (error: unknown) => {
       setFeedback({
@@ -187,8 +254,14 @@ export function SoldierBioForm({
     setActiveSheet(tabKeys[Math.max(0, activeIndex - 1)]);
   const goNextSheet = () =>
     setActiveSheet(tabKeys[Math.min(tabKeys.length - 1, activeIndex + 1)]);
-  const canPrev = !isEditMode && activeIndex > 0;
-  const canNext = !isEditMode && activeIndex < tabKeys.length - 1;
+  const canPrev = activeIndex > 0;
+  const canNext = activeIndex < tabKeys.length - 1;
+
+  const {
+    ref: tabStripRef,
+    handlers: tabStripHandlers,
+    wasDrag: tabStripWasDrag,
+  } = useDragToScroll<HTMLDivElement>();
 
   return (
     <div className="space-y-4">
@@ -272,40 +345,37 @@ export function SoldierBioForm({
         </div>
       ) : null}
 
-      <div className="scrollbar-none flex gap-2 overflow-x-auto pb-1">
-        {tabs.map((tab) => {
-          const disabled = isEditMode && tab.key !== "personnel";
-          return (
-            <button
-              key={tab.key}
-              type="button"
-              disabled={disabled}
-              onClick={() => setActiveSheet(tab.key)}
-              className={cn(
-                "shrink-0 rounded-xl border px-4 py-2.5 text-left transition-all",
-                disabled
-                  ? "cursor-not-allowed border-app-border bg-app-input/40 text-app-muted/50"
-                  : activeSheet === tab.key
-                    ? "border-app-accent/50 bg-app-accent/10 text-app-accent"
-                    : "border-app-border bg-app-card text-app-muted hover:text-app-text",
-              )}
-            >
-              <p className="flex items-center gap-1.5 text-xs font-bold leading-tight">
-                {!disabled ? (
-                  <span
-                    className={cn(
-                      "h-1.5 w-1.5 shrink-0 rounded-full",
-                      incompleteSheets.includes(tab.key)
-                        ? "bg-app-gold"
-                        : "bg-app-success",
-                    )}
-                  />
-                ) : null}
-                {tab.label}
-              </p>
-            </button>
-          );
-        })}
+      <div
+        ref={tabStripRef}
+        {...tabStripHandlers}
+        className="scrollbar-none flex cursor-grab select-none gap-2 overflow-x-auto pb-1"
+      >
+        {tabs.map((tab) => (
+          <button
+            key={tab.key}
+            type="button"
+            onClick={() => {
+              if (tabStripWasDrag()) return;
+              setActiveSheet(tab.key);
+            }}
+            className={cn(
+              "shrink-0 rounded-xl border px-4 py-2.5 text-left transition-all",
+              activeSheet === tab.key
+                ? "border-app-accent/50 bg-app-accent/10 text-app-accent"
+                : "border-app-border bg-app-card text-app-muted hover:text-app-text",
+            )}
+          >
+            <p className="flex items-center gap-1.5 text-xs font-bold leading-tight">
+              <span
+                className={cn(
+                  "h-1.5 w-1.5 shrink-0 rounded-full",
+                  incompleteSheets.includes(tab.key) ? "bg-app-gold" : "bg-app-success",
+                )}
+              />
+              {tab.label}
+            </p>
+          </button>
+        ))}
       </div>
 
       {activeSheet === "personnel" ? (
@@ -403,43 +473,61 @@ export function SoldierBioForm({
           </p>
         ) : null} */}
         <div className="flex items-center justify-between gap-2">
-          {!isEditMode ? (
-            <div className="flex shrink-0 items-center gap-2">
+          <div className="flex shrink-0 items-center gap-2">
+            <Button
+              variant="secondary"
+              className="whitespace-nowrap px-2.5 sm:px-4"
+              onClick={goPrevSheet}
+              disabled={!canPrev}
+            >
+              <ArrowLeft className="h-4 w-4" />
+              <span className="hidden sm:inline">{t("form.prevSheet")}</span>
+            </Button>
+            <Button
+              variant="secondary"
+              className="whitespace-nowrap px-2.5 sm:px-4"
+              onClick={goNextSheet}
+              disabled={!canNext}
+            >
+              <span className="hidden sm:inline">{t("form.nextSheet")}</span>
+              <ArrowRight className="h-4 w-4" />
+            </Button>
+          </div>
+          {isEditMode ? (
+            <div className="flex min-w-0 flex-1 items-center justify-end gap-2 sm:flex-none">
               <Button
                 variant="secondary"
                 className="whitespace-nowrap px-2.5 sm:px-4"
-                onClick={goPrevSheet}
-                disabled={!canPrev}
+                onClick={() => sheetUpdateMutation.mutate()}
+                disabled={
+                  sheetUpdateMutation.isPending ||
+                  allUpdateMutation.isPending ||
+                  !sheetHasInput(activeSheet, draft)
+                }
               >
-                <ArrowLeft className="h-4 w-4" />
-                <span className="hidden sm:inline">{t("form.prevSheet")}</span>
+                {sheetUpdateMutation.isPending ? t("form.saving") : t("form.updateSheet")}
               </Button>
               <Button
-                variant="secondary"
-                className="whitespace-nowrap px-2.5 sm:px-4"
-                onClick={goNextSheet}
-                disabled={!canNext}
+                className="min-w-0 flex-1 whitespace-nowrap sm:flex-none sm:min-w-40"
+                onClick={() => allUpdateMutation.mutate()}
+                disabled={
+                  allUpdateMutation.isPending ||
+                  sheetUpdateMutation.isPending ||
+                  incompleteSheets.length > 0
+                }
               >
-                <span className="hidden sm:inline">{t("form.nextSheet")}</span>
-                <ArrowRight className="h-4 w-4" />
+                {allUpdateMutation.isPending ? t("form.saving") : t("form.updateAll")}
               </Button>
             </div>
-          ) : null}
-          <Button
-            className={
-              isEditMode
-                ? "w-full max-w-none"
-                : "min-w-0 flex-1 whitespace-nowrap sm:flex-none sm:min-w-56"
-            }
-            onClick={() => mutation.mutate()}
-            disabled={mutation.isPending || incompleteSheets.length > 0}
-          >
-            {mutation.isPending
-              ? t("form.saving")
-              : isEditMode
-                ? t("form.updatePersonnel")
-                : t("form.saveProfile")}
-          </Button>
+          ) : (
+            <Button
+              className="min-w-0 flex-1 whitespace-nowrap sm:flex-none sm:min-w-56"
+              onClick={() => mutation.mutate()}
+              disabled={mutation.isPending || incompleteSheets.length > 0}
+            >
+              {mutation.isPending ? t("form.saving") : t("form.saveProfile")}
+            </Button>
+          )}
         </div>
       </div>
     </div>

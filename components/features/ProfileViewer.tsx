@@ -13,6 +13,7 @@ import { fetchProfileDetail, softDeletePersonnel } from "@/lib/api";
 import { DEFAULT_PHOTO_PATH, DETAIL_SHEET_DEFS, SHEET_DEF_MAP } from "@/lib/constants";
 import type { DetailSheetKey, Row } from "@/lib/types";
 import { useLanguage } from "@/lib/i18n";
+import { useDragToScroll } from "@/lib/useDragToScroll";
 import { Avatar } from "@/components/ui/Avatar";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
@@ -42,7 +43,7 @@ function RecordsTable({ rows, sheet }: { rows: Row[]; sheet: DetailSheetKey }) {
   if (rows.length === 0) {
     return (
       <p className="rounded-xl border border-dashed border-app-border bg-app-input/40 px-4 py-6 text-center text-sm text-app-muted">
-        {t("profile.noRecords", { sheet: def.label })}
+        {t("profile.noRecords", { sheet: formatSheetLabel(def.label) })}
       </p>
     );
   }
@@ -111,16 +112,6 @@ function PersonnelDetailCard({ row }: { row: Row }) {
 
   return (
     <div className="space-y-5">
-      <div className="overflow-hidden rounded-xl border border-app-border">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={photoSrc}
-          alt="personnel"
-          className="max-h-80 w-full object-contain bg-app-input"
-          onError={() => setPhotoErrored(true)}
-        />
-      </div>
-
       <div className="grid gap-px overflow-hidden rounded-xl border border-app-border bg-app-border sm:grid-cols-2 lg:grid-cols-3">
         {core.map((field) => (
           <div key={field.key} className="bg-app-card p-4">
@@ -161,6 +152,12 @@ export function ProfileViewer({
   const { lang, t } = useLanguage();
   const [section, setSection] = useState<"personnel" | DetailSheetKey>("personnel");
   const queryClient = useQueryClient();
+
+  const {
+    ref: sectionListRef,
+    handlers: sectionListHandlers,
+    wasDrag: sectionListWasDrag,
+  } = useDragToScroll<HTMLDivElement>();
 
   const profileQuery = useQuery({
     queryKey: ["profile", personnelId],
@@ -249,34 +246,39 @@ export function ProfileViewer({
             </div>
           </div>
 
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-2 justify-end">
             <Button
               variant="add"
-              className="bg-app-accent/10 text-app-accent"
+              className="!h-11 !w-11 !rounded-xl !px-0"
               onClick={() => onEditPersonnel(personnel.Personnel_ID)}
+              aria-label={t("profile.editPersonnel")}
+              title={t("profile.editPersonnel")}
             >
-              <PencilLine className="mr-1.5 h-4 w-4" />
-              {t("profile.editPersonnel")}
+              <PencilLine className="h-4 w-4" />
             </Button>
             <Button
               variant="danger"
-              className="!h-11 !w-auto !rounded-xl px-4 text-sm"
+              className="!h-11 !w-11 !rounded-xl !px-0 flex items-center justify-center"
               onClick={() => deleteMutation.mutate(personnel.Personnel_ID)}
               disabled={deleteMutation.isPending}
+              aria-label={t("profile.softDelete")}
+              title={t("profile.softDelete")}
             >
-              <Trash2 className="mr-1.5 h-4 w-4" />
-              {deleteMutation.isPending ? t("profile.deleting") : t("profile.softDelete")}
+              <Trash2 className="h-4 w-4" />
             </Button>
           </div>
         </div>
 
         <div className="border-t border-app-border">
-          <div className="scrollbar-none flex gap-1 overflow-x-auto p-2">
+          <div className="scrollbar-none flex cursor-grab select-none gap-1 overflow-x-auto p-2" ref={sectionListRef} {...sectionListHandlers}>
             {sections.map((sec) => (
               <button
                 key={sec.key}
                 type="button"
-                onClick={() => setSection(sec.key)}
+                onClick={() => {
+                  if (sectionListWasDrag()) return;
+                  setSection(sec.key);
+                }}
                 className={cn(
                   "shrink-0 rounded-xl px-4 py-2.5 text-left transition-all",
                   section === sec.key

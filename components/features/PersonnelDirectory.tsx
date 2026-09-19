@@ -87,7 +87,15 @@ function DirectoryTable({
                 <td className="tbody-cell font-mono text-xs text-app-accent">{item.Personnel_ID}</td>
                 <td className="tbody-cell">{item["ភេទ"] || "—"}</td>
                 <td className="tbody-cell">{item["ឋាននិរនាម/មុខតំណែងបច្ចុប្បន្ន"] || "—"}</td>
-                <td className="tbody-cell">{item["កងឯកភាព"] || "—"}</td>
+                <td className="tbody-cell">
+  {item["កងឯកភាព"] ? (
+    <span className="line-clamp-2 block max-w-[240px] whitespace-normal">
+      {item["កងឯកភាព"]}
+    </span>
+  ) : (
+    "—"
+  )}
+</td>
                 <td className="tbody-cell">
                   <Badge tone={isDeleted(item) ? "danger" : "success"} title={t("common.status")}>
                     {item.Status ?? "ACTIVE"}
@@ -131,7 +139,7 @@ export function PersonnelDirectory({
     queryFn: () =>
       fetchPersonnelList({
         page,
-        limit: 12,
+        limit: 10,
         q: search || undefined,
         includeDeleted: filter === "all" || filter === "deleted",
       }),

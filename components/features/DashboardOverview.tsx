@@ -20,7 +20,7 @@ import { useLanguage } from "@/lib/i18n";
 import { Button } from "@/components/ui/Button";
 import { Loader } from "@/components/ui/Loader";
 import { EmptyState } from "@/components/ui/EmptyState";
-import { cn, isDeleted } from "@/lib/utils";
+import { cn, formatSheetLabel, isDeleted } from "@/lib/utils";
 
 interface OverviewProps {
   onNavigate: (view: DashboardView, personnelId?: string) => void;
@@ -273,7 +273,7 @@ function computeStats(profiles: SoldierProfileDetail[]): {
     totalRecords += rows;
     return {
       key: def.key,
-      label: def.label,
+      label: formatSheetLabel(def.label),
       shortLabel: def.shortLabel,
       description: def.description,
       descriptionEn: def.descriptionEn,
