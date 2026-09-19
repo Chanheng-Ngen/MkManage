@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArchiveRestore, Eye, Search, ShieldCheck, Trash2 } from "lucide-react";
+import { ArchiveRestore, Search, ShieldCheck, Trash2 } from "lucide-react";
 import { fetchPersonnelList, restorePersonnel } from "@/lib/api";
 import type { PersonnelRecord } from "@/lib/types";
 import { useLanguage } from "@/lib/i18n";
@@ -13,11 +13,7 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { Loader } from "@/components/ui/Loader";
 import { displayName, isDeleted } from "@/lib/utils";
 
-interface DeletedRecordsProps {
-  onView: (personnelId: string) => void;
-}
-
-export function DeletedRecords({ onView }: DeletedRecordsProps) {
+export function DeletedRecords() {
   const { t } = useLanguage();
   const [search, setSearch] = useState("");
   const queryClient = useQueryClient();
@@ -89,13 +85,9 @@ export function DeletedRecords({ onView }: DeletedRecordsProps) {
               </div>
 
               <div className="mt-4 flex flex-wrap gap-2 border-t border-app-border/60 pt-3">
-                <Button variant="add" onClick={() => restoreMutation.mutate(item.Personnel_ID)} disabled={restoreMutation.isPending} className="flex-1 !text-xs">
+                <Button variant="add" onClick={() => restoreMutation.mutate(item.Personnel_ID)} disabled={restoreMutation.isPending} className="w-full !text-xs">
                   <ArchiveRestore className="mr-1.5 h-4 w-4" />
                   {t("deleted.restore")}
-                </Button>
-                <Button variant="add" onClick={() => onView(item.Personnel_ID)} className="flex-1 !text-xs">
-                  <Eye className="mr-1.5 h-4 w-4" />
-                  {t("deleted.view")}
                 </Button>
               </div>
             </div>

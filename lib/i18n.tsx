@@ -166,6 +166,13 @@ const DICT: Record<string, { en: string; km: string }> = {
   "profile.softDelete": { en: "Delete", km: "លុប" },
   "profile.deleting": { en: "Deleting...", km: "កំពុងលុប..." },
   "profile.deleteFailed": { en: "Delete failed", km: "ការលុបបរាជ័យ" },
+  "profile.deleteConfirmTitle": { en: "Delete profile?", km: "លុបប្រវត្តិរូបនេះ?" },
+  "profile.deleteConfirmMessage": {
+    en: "The profile of \"{name}\" will be moved to deleted records. It can be restored later.",
+    km: "ប្រវត្តិរូបរបស់ \"{name}\" នឹងត្រូវផ្លាស់ទៅក្នុងប្រវត្តិរូបដែលបានលុប។ វាអាចត្រូវបានស្តារនៅពេលក្រោយ។",
+  },
+  "common.cancel": { en: "Cancel", km: "បោះបង់" },
+  "common.confirm": { en: "Confirm", km: "យល់ព្រម" },
   "profile.otherInfo": { en: "Other details", km: "ព័ត៌មានផ្សេងទៀត" },
   "profile.recordColumn": { en: "Record", km: "កំណត់ត្រា" },
   "profile.statusColumn": { en: "Status", km: "ស្ថានភាព" },
@@ -338,7 +345,6 @@ const DICT: Record<string, { en: string; km: string }> = {
     km: "ប្រវត្តិរូបដែលបានលុបនឹងបង្ហាញនៅទីនេះ",
   },
   "deleted.restore": { en: "Restore", km: "ស្តារ" },
-  "deleted.view": { en: "View", km: "មើល" },
 };
 
 const LanguageContext = createContext<LanguageContextValue | null>(null);

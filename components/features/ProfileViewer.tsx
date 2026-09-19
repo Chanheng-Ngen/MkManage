@@ -151,6 +151,7 @@ export function ProfileViewer({
 }: ProfileViewerProps) {
   const { lang, t } = useLanguage();
   const [section, setSection] = useState<"personnel" | DetailSheetKey>("personnel");
+  const [confirmDelete, setConfirmDelete] = useState(false);
   const queryClient = useQueryClient();
 
   const {
@@ -259,7 +260,7 @@ export function ProfileViewer({
             <Button
               variant="danger"
               className="!h-11 !w-11 !rounded-xl !px-0 flex items-center justify-center"
-              onClick={() => deleteMutation.mutate(personnel.Personnel_ID)}
+              onClick={() => setConfirmDelete(true)}
               disabled={deleteMutation.isPending}
               aria-label={t("profile.softDelete")}
               title={t("profile.softDelete")}
@@ -320,6 +321,47 @@ export function ProfileViewer({
         <p className="rounded-xl border border-app-danger/40 bg-app-danger/10 px-4 py-3 text-sm text-app-danger">
           {deleteMutation.error instanceof Error ? deleteMutation.error.message : t("profile.deleteFailed")}
         </p>
+      ) : null}
+
+      {confirmDelete ? (
+        <div
+          className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 p-4 backdrop-blur-sm sm:items-center"
+          onClick={() => setConfirmDelete(false)}
+        >
+          <div
+            className="panel w-full max-w-md p-6"
+            onClick={(e) => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-label={t("profile.deleteConfirmTitle")}
+          >
+            <div className="flex items-start gap-4">
+              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-app-danger bg-app-danger/10 text-app-danger">
+                <Trash2 className="h-5 w-5" />
+              </span>
+              <div className="min-w-0">
+                <h3 className="text-lg font-bold text-app-text">{t("profile.deleteConfirmTitle")}</h3>
+                <p className="mt-1.5 text-sm text-app-muted">
+                  {t("profile.deleteConfirmMessage", { name: displayName(personnel) })}
+                </p>
+              </div>
+            </div>
+            <div className="mt-6 flex justify-end gap-2">
+              <Button variant="secondary" onClick={() => setConfirmDelete(false)} disabled={deleteMutation.isPending}>
+                {t("common.cancel")}
+              </Button>
+              <button
+                type="button"
+                onClick={() => deleteMutation.mutate(personnel.Personnel_ID)}
+                disabled={deleteMutation.isPending}
+                className="inline-flex h-11 items-center justify-center gap-1.5 rounded-xl border border-app-danger bg-app-danger/10 px-4 text-sm font-bold text-app-danger transition-colors hover:bg-app-danger/20 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                <Trash2 className="h-4 w-4" />
+                {deleteMutation.isPending ? t("profile.deleting") : t("profile.softDelete")}
+              </button>
+            </div>
+          </div>
+        </div>
       ) : null}
     </div>
   );

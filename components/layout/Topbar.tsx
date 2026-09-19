@@ -113,7 +113,7 @@ export function Topbar({
             onSearch(query.trim());
           }}
         >
-          <div className="flex items-center gap-2">
+          <div className="flex min-w-0 items-center gap-2">
             <Search className="pointer-events-none absolute left-8 top-1/2 h-4 w-4 -translate-y-1/2 text-app-muted" />
             <input
               autoFocus
@@ -123,7 +123,7 @@ export function Topbar({
                 if (e.key === "Escape") setSearchOpen(false);
               }}
               placeholder={t("topbar.searchPlaceholder")}
-              className="h-11 w-full rounded-xl border border-app-border bg-app-input pl-10 pr-3 text-sm text-app-text outline-none transition-colors placeholder:text-app-muted/60 focus:border-app-accent"
+              className="h-11 min-w-0 flex-1 rounded-xl border border-app-border bg-app-input pl-10 pr-3 text-base text-app-text outline-none transition-colors placeholder:text-app-muted/60 focus:border-app-accent"
             />
             <button
               type="button"

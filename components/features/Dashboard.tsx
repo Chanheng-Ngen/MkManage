@@ -138,7 +138,7 @@ export function Dashboard() {
           ) : null}
 
           {activeView === "deleted" ? (
-            <DeletedRecords onView={handleSelectPersonnel} />
+            <DeletedRecords />
           ) : null}
         </main>
       </div>
