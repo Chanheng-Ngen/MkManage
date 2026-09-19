@@ -64,7 +64,7 @@ export function Topbar({
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder={t("topbar.searchPlaceholder")}
-            className="h-10 w-56 rounded-xl border border-app-border bg-app-input pl-9 pr-3 text-sm text-app-text outline-none transition-colors placeholder:text-app-muted/60 focus:border-app-accent lg:w-72"
+            className="h-9 w-56 rounded-xl border border-app-border bg-app-input pl-9 pr-3 text-sm text-app-text outline-none transition-colors placeholder:text-app-muted/60 focus:border-app-accent lg:w-72"
           />
         </form>
 
@@ -74,7 +74,7 @@ export function Topbar({
           aria-label="Search"
           title={t("topbar.searchPlaceholder")}
           className={cn(
-            "flex items-center justify-center rounded-xl border border-app-border bg-app-input p-3 text-app-muted transition-colors hover:border-app-accent/50 hover:text-app-text md:hidden",
+            "flex items-center justify-center rounded-xl border border-app-border bg-app-input p-2 text-app-muted transition-colors hover:border-app-accent/50 hover:text-app-text md:hidden",
             searchOpen && "border-app-accent/50 text-app-accent",
           )}
         >
