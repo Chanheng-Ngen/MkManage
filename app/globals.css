@@ -1,0 +1,94 @@
+@import "tailwindcss";
+
+@theme {
+  --color-app-bg: #0a1120;
+  --color-app-surface: #0d1526;
+  --color-app-card: #111a2e;
+  --color-app-card2: #15203a;
+  --color-app-accent: #22d3ee;
+  --color-app-accent-dim: #0e7490;
+  --color-app-border: #1e2a44;
+  --color-app-text: #e5edf8;
+  --color-app-muted: #8896b4;
+  --color-app-input: #0b1322;
+  --color-app-gold: #f0c559;
+  --color-app-danger: #fb7185;
+  --color-app-success: #34d399;
+  --color-app-tabbar: #0c1424;
+  --font-sans: var(--font-inter), var(--font-kantumruy), sans-serif;
+  --font-khmer: var(--font-kantumruy), sans-serif;
+}
+
+html {
+  color-scheme: dark;
+  scrollbar-color: #2a3a5c #0a1120;
+}
+
+body {
+  background-color: var(--color-app-bg);
+  color: var(--color-app-text);
+  font-family: var(--font-inter), var(--font-kantumruy), sans-serif;
+}
+
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+*::-webkit-scrollbar-track {
+  background: var(--color-app-bg);
+}
+*::-webkit-scrollbar-thumb {
+  background: #24334f;
+  border-radius: 999px;
+  border: 2px solid var(--color-app-bg);
+}
+
+@layer components {
+  .glass {
+    background: linear-gradient(
+      160deg,
+      rgba(30, 47, 77, 0.55),
+      rgba(15, 24, 44, 0.75)
+    );
+    border: 1px solid rgba(120, 145, 190, 0.16);
+    backdrop-filter: blur(14px);
+  }
+
+  .panel {
+    @apply rounded-2xl border border-app-border bg-app-card/90 shadow-lg shadow-black/20;
+  }
+
+  .panel-hover {
+    @apply transition-colors hover:border-app-accent/50;
+  }
+
+  .chip {
+    @apply inline-flex items-center gap-1.5 rounded-full border border-app-border bg-app-input/70 px-3 py-1 text-xs font-medium text-app-muted;
+  }
+
+  .thead-cell {
+    @apply px-3 py-2 text-left text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-app-muted;
+  }
+
+  .tbody-cell {
+    @apply px-3 py-2.5 text-sm text-app-text;
+  }
+}
+
+@layer utilities {
+  .scrollbar-none {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.bg-grid {
+  background-image:
+    linear-gradient(rgba(90, 120, 180, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(90, 120, 180, 0.05) 1px, transparent 1px);
+  background-size: 42px 42px;
+}
